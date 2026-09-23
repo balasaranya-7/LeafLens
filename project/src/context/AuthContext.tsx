@@ -1,9 +1,12 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
-import type { User } from '@supabase/supabase-js';
-import { supabase } from '@/lib/supabase';
+
+interface LocalUser {
+  id: string;
+  email: string;
+}
 
 interface AuthContextValue {
-  user: User | null;
+  user: LocalUser | null;
   loading: boolean;
   signIn: (email: string, password: string) => Promise<{ error: string | null }>;
   signUp: (email: string, password: string) => Promise<{ error: string | null }>;
@@ -12,40 +15,102 @@ interface AuthContextValue {
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
+const USERS_KEY = 'leaflens_users';
+const SESSION_KEY = 'leaflens_session';
+
+interface StoredUser {
+  id: string;
+  email: string;
+  password: string;
+}
+
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<LocalUser | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data }) => {
-      setUser(data.session?.user ?? null);
+    try {
+      const session = localStorage.getItem(SESSION_KEY);
+
+      if (session) {
+        setUser(JSON.parse(session));
+      }
+    } catch {
+      localStorage.removeItem(SESSION_KEY);
+    } finally {
       setLoading(false);
-    });
-
-    const { data: sub } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null);
-    });
-
-    return () => sub.subscription.unsubscribe();
+    }
   }, []);
 
   const signIn = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
-    return { error: error?.message ?? null };
+    const users: StoredUser[] = JSON.parse(
+      localStorage.getItem(USERS_KEY) || '[]'
+    );
+
+    const existingUser = users.find(
+      (u) => u.email.toLowerCase() === email.toLowerCase()
+    );
+
+    if (!existingUser) {
+      return { error: 'No account found with this email. Please register first.' };
+    }
+
+    if (existingUser.password !== password) {
+      return { error: 'Incorrect password.' };
+    }
+
+    const loggedInUser: LocalUser = {
+      id: existingUser.id,
+      email: existingUser.email,
+    };
+
+    localStorage.setItem(SESSION_KEY, JSON.stringify(loggedInUser));
+    setUser(loggedInUser);
+
+    return { error: null };
   };
 
   const signUp = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signUp({ email, password });
-    return { error: error?.message ?? null };
+    const users: StoredUser[] = JSON.parse(
+      localStorage.getItem(USERS_KEY) || '[]'
+    );
+
+    const emailExists = users.some(
+      (u) => u.email.toLowerCase() === email.toLowerCase()
+    );
+
+    if (emailExists) {
+      return { error: 'An account with this email already exists.' };
+    }
+
+    const newUser: StoredUser = {
+      id: crypto.randomUUID(),
+      email,
+      password,
+    };
+
+    users.push(newUser);
+
+    localStorage.setItem(USERS_KEY, JSON.stringify(users));
+
+    return { error: null };
   };
 
   const signOut = async () => {
-    await supabase.auth.signOut();
+    localStorage.removeItem(SESSION_KEY);
     setUser(null);
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, signIn, signUp, signOut }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        loading,
+        signIn,
+        signUp,
+        signOut,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );
@@ -53,6 +118,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
 export function useAuth() {
   const ctx = useContext(AuthContext);
-  if (!ctx) throw new Error('useAuth must be used within AuthProvider');
+
+  if (!ctx) {
+    throw new Error('useAuth must be used within AuthProvider');
+  }
+
   return ctx;
 }
