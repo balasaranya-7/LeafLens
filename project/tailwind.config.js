@@ -1,0 +1,123 @@
+/** @type {import('tailwindcss').Config} */
+export default {
+  content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],
+  theme: {
+    extend: {
+      fontFamily: {
+        sans: ['Inter', 'system-ui', 'sans-serif'],
+        display: ['"Plus Jakarta Sans"', 'Inter', 'system-ui', 'sans-serif'],
+      },
+      colors: {
+        // Natural green primary ramp
+        primary: {
+          50: '#f0f9f4',
+          100: '#dcf0e3',
+          200: '#bbe1c9',
+          300: '#8acaa6',
+          400: '#54ac7f',
+          500: '#2f8d62',
+          600: '#1f704c',
+          700: '#1a5a3f',
+          800: '#174834',
+          900: '#133b2c',
+          950: '#0a2118',
+        },
+        // Emerald secondary
+        secondary: {
+          50: '#edfdf5',
+          100: '#d3f9e8',
+          200: '#a9f0d4',
+          300: '#6ee2bb',
+          400: '#34ca9b',
+          500: '#10ac7e',
+          600: '#088a67',
+          700: '#076e54',
+          800: '#095845',
+          900: '#0a4939',
+          950: '#01291f',
+        },
+        // Accent (lime-ish for highlights)
+        accent: {
+          50: '#f7fee7',
+          100: '#eefbc3',
+          200: '#def78c',
+          300: '#c8eb51',
+          400: '#b2d928',
+          500: '#9bbf15',
+          600: '#799a0f',
+          700: '#5d7710',
+          800: '#4c5e13',
+          900: '#414f15',
+          950: '#232c06',
+        },
+        success: {
+          50: '#f0fdf4',
+          100: '#dcfce7',
+          200: '#bbf7d0',
+          300: '#86efac',
+          400: '#4ade80',
+          500: '#22c55e',
+          600: '#16a34a',
+          700: '#15803d',
+          800: '#166534',
+          900: '#14532d',
+        },
+        warning: {
+          50: '#fffbeb',
+          100: '#fef3c7',
+          200: '#fde68a',
+          300: '#fcd34d',
+          400: '#fbbf24',
+          500: '#f59e0b',
+          600: '#d97706',
+          700: '#b45309',
+          800: '#92400e',
+          900: '#78350f',
+        },
+        error: {
+          50: '#fef2f2',
+          100: '#fee2e2',
+          200: '#fecaca',
+          300: '#fca5a5',
+          400: '#f87171',
+          500: '#ef4444',
+          600: '#dc2626',
+          700: '#b91c1c',
+          800: '#991b1b',
+          900: '#7f1d1d',
+        },
+      },
+      animation: {
+        'fade-in-up': 'fadeInUp 0.6s ease-out forwards',
+        'fade-in': 'fadeIn 0.5s ease-out forwards',
+        'scan-line': 'scanLine 2s ease-in-out infinite',
+        'pulse-slow': 'pulse 3s ease-in-out infinite',
+        'float': 'float 4s ease-in-out infinite',
+        'shimmer': 'shimmer 2.5s linear infinite',
+      },
+      keyframes: {
+        fadeInUp: {
+          '0%': { opacity: '0', transform: 'translateY(24px)' },
+          '100%': { opacity: '1', transform: 'translateY(0)' },
+        },
+        fadeIn: {
+          '0%': { opacity: '0' },
+          '100%': { opacity: '1' },
+        },
+        scanLine: {
+          '0%, 100%': { top: '10%' },
+          '50%': { top: '90%' },
+        },
+        float: {
+          '0%, 100%': { transform: 'translateY(0)' },
+          '50%': { transform: 'translateY(-12px)' },
+        },
+        shimmer: {
+          '0%': { backgroundPosition: '-1000px 0' },
+          '100%': { backgroundPosition: '1000px 0' },
+        },
+      },
+    },
+  },
+  plugins: [],
+};
